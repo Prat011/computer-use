@@ -1,0 +1,5 @@
+anthropic[bedrock,vertex]>=0.37.1
+pillow
+PyAutoGUI
+streamlit
+nest_asyncio
