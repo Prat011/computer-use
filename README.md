@@ -110,6 +110,27 @@ Here's a sample workflow demonstrating the agent creating a Google Spreadsheet:
    ![Final Spreadsheet](screenshots/Screenshot%20Tool%20BDRK%20(4).png)
    - Completed spreadsheet with columns
 
+## Windows Example Workflow
+
+Here's a sample workflow demonstrating the agent performing tasks on Windows:
+
+1. Initial Desktop
+   ![Screenshot 1](screenshots/windows_sheet_1.png)
+
+2. Opening Chrome
+   ![Screenshot 2](screenshots/windows_sheet_2.png)
+
+3. Opening Google Sheets
+   ![Screenshot 3](screenshots/windows_sheet_3.png)
+
+4. Browser Interaction
+   ![Screenshot 4](screenshots/windows_sheet_4.png)
+
+5. Spreadsheet Tasks
+   ![Screenshot 5](screenshots/windows_sheet_5.png)
+
+Note: The actual appearance may vary depending on your Windows version and theme settings.
+
 ## Understanding the Output
 
 The conversation history shows different types of messages:
@@ -125,18 +146,6 @@ Example output sequence:
 🔧 Tool Output: Left click performed.
 ```
 
-## Troubleshooting
-
-1. If the agent seems stuck:
-   - Use the "Stop" button to interrupt the current execution
-   - Clear the conversation and try again with more specific instructions
-   - Ensure the instructions are clear and actionable
-
-2. Common considerations:
-   - Mouse coordination: The agent will adjust based on screen feedback
-   - Browser navigation: The agent uses visual cues to navigate
-   - Screen resolution: The agent adapts to your screen layout
-
 ## Tips for Best Results
 
 1. Write clear, specific instructions
@@ -145,26 +154,6 @@ Example output sequence:
 4. Monitor the conversation history for detailed feedback
 5. Use "Stop" if you need to interrupt a sequence of actions
 
-## Windows Example Workflow
-
-Here's a sample workflow demonstrating the agent performing tasks on Windows:
-
-1. Initial Desktop
-   ![Screenshot 1](screenshots/windows_sheet_1.png)
-
-2. Opening Applications
-   ![Screenshot 2](screenshots/windows_sheet_2.png)
-
-3. Performing Operations
-   ![Screenshot 3](screenshots/windows_sheet_3.png)
-
-4. Browser Interaction
-   ![Screenshot 4](screenshots/windows_sheet_4.png)
-
-5. Spreadsheet Tasks
-   ![Screenshot 5](screenshots/windows_sheet_5.png)
-
-Note: The actual appearance may vary depending on your Windows version and theme settings.
 
 ### Windows-Specific Tips
 
