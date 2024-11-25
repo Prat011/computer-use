@@ -86,6 +86,13 @@ This guide walks you through the process of using the Computer Use Demo, which d
 - Click "📸 Click a screenshot to continue" to upload an image
 - The agent will analyze the screenshot and continue its tasks accordingly
 
+## Sample Video
+
+<video width="100%" controls>
+  <source src="screenshots/demo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 ## Example Workflow
 
 Here's a sample workflow demonstrating the agent creating a Google Spreadsheet:
