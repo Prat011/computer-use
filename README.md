@@ -25,13 +25,17 @@ View Anthropic's docs [here](https://docs.anthropic.com/en/docs/build-with-claud
    pip3.12 install -r requirements.txt
    ```
 
-3. **Set your Anthropic API key as an environment variable:**
+3. **Set your AWS Bedrock credentials**
 
    ```bash
-   export ANTHROPIC_API_KEY="CLAUDE_API_KEY"
+   aws configure
    ```
 
-   Replace `CLAUDE_API_KEY` with your actual Anthropic API key. You find yours [here](https://console.anthropic.com/settings/keys).
+   Replace `YOUR_ACCESS_KEY_ID` and `YOUR_SECRET_ACCESS_KEY` with your actual Bedrock credentials.
+   and export your profile name
+   ```bash
+   export AWS_PROFILE=default
+   ```
 
 4. **Grant Accessibility Permissions:**
 
@@ -48,12 +52,18 @@ You can run the script by passing the instruction directly via the command line 
 **Example using command line instruction:**
 
 ```bash
-python3.12 main.py 'Open Safari and look up Anthropic'
+python3.12 run_in_terminal.py 'Open Safari and look up Anthropic'
 ```
 
 Replace `'Open Safari and look up Anthropic'` with your desired instruction.
 
 **Note:** If you do not provide an instruction via the command line, the script will use the default instruction specified in `main.py`. You can edit `main.py` to change this default instruction.
+
+**How to run the frontend?**
+
+```bash
+streamlit run run_with_streamlit.py
+```
 
 ## Exiting the Script
 
