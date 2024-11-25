@@ -19,27 +19,35 @@ def load_instructions():
     """Load instructions from instructions.txt file"""
     try:
         with open('instructions.txt', 'r') as file:
-            return file.read().strip()
+            instructions = [line.strip() for line in file.readlines() if line.strip()]
+            instructions = [instr[2:] if instr.startswith('- ') else instr for instr in instructions]
+            return instructions
     except FileNotFoundError:
-        # Create default instructions file if it doesn't exist
-        default_instructions = "What do you see in this screenshot?"
-        with open('instructions.txt', 'w') as file:
-            file.write(default_instructions)
+        default_instructions = [
+            "What operating system is this?",
+            "Open the calculator app",
+            "What is 2+2?"
+        ]
+        save_instructions(default_instructions)
         return default_instructions
 
-def save_instructions(text):
+def save_instructions(instructions):
     """Save instructions to instructions.txt file"""
     with open('instructions.txt', 'w') as file:
-        file.write(text)
+        for instruction in instructions:
+            file.write(f"- {instruction}\n")
         
 # Initialize Streamlit state for task tracking
-if 'messages' not in st.session_state:
+if 'messages' not in st.session_state or 'initialized' not in st.session_state:
+    st.session_state.initialized = True
     st.session_state.messages = []
     st.session_state.screenshots = []
     st.session_state.loop = None
     st.session_state.instructions = load_instructions()
     st.session_state.current_task = None
     st.session_state.is_running = False
+    st.session_state.current_step = 0
+    st.session_state.step_completed = False
 
 def init_asyncio_loop():
     if not st.session_state.loop:
@@ -83,28 +91,36 @@ with st.sidebar:
         value=4096
     )
 
-    # Add instructions file editor in sidebar
-    st.header("Edit Default Instructions")
+    # Add instructions editor in sidebar
+    st.header("Edit Instructions")
+    instructions_text = "\n".join(f"- {instr}" for instr in st.session_state.instructions)
     edited_instructions = st.text_area(
-        "Default Instructions",
-        value=st.session_state.instructions,
+        "Instructions (one per line, start with '-')",
+        value=instructions_text,
         height=200
     )
     if st.button("Save Instructions"):
-        save_instructions(edited_instructions)
-        st.session_state.instructions = edited_instructions
+        new_instructions = [line.strip()[2:] if line.strip().startswith('- ') else line.strip() 
+                          for line in edited_instructions.split('\n') 
+                          if line.strip()]
+        save_instructions(new_instructions)
+        st.session_state.instructions = new_instructions
+        st.session_state.current_step = 0
+        st.session_state.step_completed = False
         st.success("Instructions saved!")
 
 # Main content area
+st.subheader("Current Instruction")
+if st.session_state.instructions:
+    current_instruction = st.session_state.instructions[st.session_state.current_step]
+    st.info(f"Step {st.session_state.current_step + 1} of {len(st.session_state.instructions)}: {current_instruction}")
+else:
+    st.warning("No instructions available. Please add some in the sidebar.")
+
 col1, col2 = st.columns([2, 1])
 
-with col1:
-    instruction = st.text_input(
-        "Enter your instruction:",
-        value=st.session_state.instructions
-    )
-
 with col2:
+    st.write("📸 Click a screenshot to continue")
     uploaded_file = st.file_uploader("Upload a screenshot", type=['png', 'jpg', 'jpeg'])
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
@@ -122,10 +138,9 @@ def encode_image_to_base64(image):
 
 async def run_computer_use():
     try:
-        # Store the task in session state
         st.session_state.is_running = True
+        current_instruction = st.session_state.instructions[st.session_state.current_step]
         
-        # Prepare the initial message with image if provided
         if uploaded_file is not None:
             image_base64 = encode_image_to_base64(image)
             messages: list[BetaMessageParam] = [
@@ -142,7 +157,7 @@ async def run_computer_use():
                         },
                         {
                             "type": "text",
-                            "text": instruction
+                            "text": f"Click a screenshot. {current_instruction}"
                         }
                     ]
                 }
@@ -151,7 +166,7 @@ async def run_computer_use():
             messages: list[BetaMessageParam] = [
                 {
                     "role": "user",
-                    "content": instruction,
+                    "content": f"Click a screenshot. {current_instruction}",
                 }
             ]
 
@@ -163,20 +178,27 @@ async def run_computer_use():
         def tool_output_callback(result: ToolResult, tool_use_id: str):
             if result.output:
                 tool_output.write(f"> Tool Output [{tool_use_id}]: {result.output}")
+                st.session_state.messages.append(("tool", f"Tool Output: {result.output}"))
             if result.error:
                 tool_output.write(f"!!! Tool Error [{tool_use_id}]: {result.error}")
+                st.session_state.messages.append(("error", f"Error: {result.error}"))
             if result.base64_image:
                 st.session_state.screenshots.append(
                     (f"screenshot_{tool_use_id}.png", result.base64_image)
                 )
 
         def api_response_callback(response: APIResponse[BetaMessage]):
-            st.session_state.messages.append(
-                ("system", json.dumps(json.loads(response.text)["content"], indent=4))
-            )
+            # We'll now only store the actual message content, not the full API response
+            content = json.loads(response.text)["content"]
+            if isinstance(content, list):
+                for item in content:
+                    if item.get("type") == "text":
+                        st.session_state.messages.append(("system", item.get("text")))
+            elif isinstance(content, dict) and content.get("type") == "text":
+                st.session_state.messages.append(("system", content.get("text")))
 
         try:
-            messages = await sampling_loop(
+            await sampling_loop(
                 model=model,
                 provider=provider,
                 system_prompt_suffix=system_prompt,
@@ -188,6 +210,8 @@ async def run_computer_use():
                 only_n_most_recent_images=10,
                 max_tokens=max_tokens,
             )
+            st.session_state.step_completed = True
+            
         except asyncio.CancelledError:
             st.warning("Execution was stopped by user")
             raise
@@ -203,16 +227,19 @@ async def run_computer_use():
         st.session_state.is_running = False
         st.session_state.current_task = None
 
-def stop_execution():
-    if st.session_state.current_task:
-        st.session_state.loop.call_soon_threadsafe(st.session_state.current_task.cancel)
-        st.session_state.is_running = False
-        st.session_state.current_task = None
-        st.rerun()
+async def execute_all_remaining_steps():
+    while (st.session_state.current_step < len(st.session_state.instructions) and 
+           not st.session_state.is_running):
+        await run_computer_use()
+        if st.session_state.step_completed:
+            st.session_state.current_step += 1
+            st.session_state.step_completed = False
+        else:
+            break
 
 def run_async_code():
     loop = st.session_state.loop
-    task = asyncio.ensure_future(run_computer_use(), loop=loop)
+    task = asyncio.ensure_future(execute_all_remaining_steps(), loop=loop)
     st.session_state.current_task = task
     try:
         loop.run_until_complete(task)
@@ -224,21 +251,40 @@ def run_async_code():
         st.session_state.is_running = False
         st.session_state.current_task = None
 
-# Create two columns for the Run and Stop buttons
-col1, col2 = st.columns(2)
+# Create columns for the control buttons
+col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    if st.button("Run", disabled=st.session_state.is_running):
+    if st.button("Execute All Steps", disabled=st.session_state.is_running or not st.session_state.instructions):
         run_async_code()
 
 with col2:
-    if st.button("Stop", disabled=not st.session_state.is_running):
-        stop_execution()
+    if st.button("Next Step", disabled=not st.session_state.step_completed or 
+                 st.session_state.current_step >= len(st.session_state.instructions) - 1):
+        st.session_state.current_step += 1
+        st.session_state.step_completed = False
+        st.rerun()
 
-# Clear button to reset the conversation
-if st.button("Clear Conversation", disabled=st.session_state.is_running):
+with col3:
+    if st.button("Stop", disabled=not st.session_state.is_running):
+        if st.session_state.current_task:
+            st.session_state.current_task.cancel()
+
+with col4:
+    if st.button("Clear Conversation"):
+        st.session_state.messages = []
+        st.session_state.current_step = 0
+        st.session_state.step_completed = False
+        st.session_state.is_running = False
+        st.session_state.current_task = None
+        st.rerun()
+
+# Reset button
+if st.button("Reset All", disabled=st.session_state.is_running):
     st.session_state.messages = []
     st.session_state.screenshots = []
+    st.session_state.current_step = 0
+    st.session_state.step_completed = False
     st.rerun()
 
 # Display conversation history
@@ -247,8 +293,11 @@ for role, message in st.session_state.messages:
     if role == "assistant":
         st.write(f"🤖 Assistant: {message}")
     elif role == "system":
-        with st.expander("Show API Response"):
-            st.code(message, language="json")
+        st.write(f"💻 System: {message}")
+    elif role == "tool":
+        st.write(f"🔧 {message}")
+    elif role == "error":
+        st.write(f"❌ {message}")
 
 # Display screenshots
 if st.session_state.screenshots:

@@ -1,76 +1,147 @@
-# Claude Computer Use Demo for MacOS
+# Computer Use Demo - Step by Step Guide
 
-This repository contains a Python script that demonstrates Anthropic's Computer Use capabilities, modified to run on MacOS without requiring a Docker container. The script allows Claude 3.5 Sonnet to perform tasks on your Mac by simulating mouse and keyboard actions as well as running bash command.
+This guide walks you through the process of using the Computer Use Demo, which demonstrates an AI agent's ability to interact with your computer interface.
 
-Forked from Anthropic's [computer use demo](https://github.com/anthropics/anthropic-quickstarts/tree/main/computer-use-demo) - optimized for MacOS.
-View Anthropic's docs [here](https://docs.anthropic.com/en/docs/build-with-claude/computer-use).
+## Setup and Installation
 
-> [!WARNING]  
-> Use this script with caution. Allowing Claude to control your computer can be risky. By running this script, you assume all responsibility and liability.
-
-## Installation and Setup
-
-1. **Clone the repository:**
-
+1. Make sure you have Python installed on your system
+2. Install the required dependencies:
    ```bash
-   git clone https://github.com/PallavAg/claude-computer-use-macos.git
-   cd claude-computer-use-macos
+   pip install -r requirements.txt
    ```
 
-2. **Create a virtual environment + install dependencies:**
+## AWS Bedrock Setup
 
-   ```bash
-   python3.12 -m venv venv
-   source venv/bin/activate
-   pip3.12 install -r requirements.txt
-   ```
-
-3. **Set your AWS Bedrock credentials**
-
+1. Configure your AWS credentials:
    ```bash
    aws configure
    ```
+   When prompted, enter:
+   - Your AWS Access Key ID
+   - Your AWS Secret Access Key
+   - Default region name
+   - Default output format
 
-   Replace `YOUR_ACCESS_KEY_ID` and `YOUR_SECRET_ACCESS_KEY` with your actual Bedrock credentials.
-   and export your profile name
+2. Set your AWS profile:
    ```bash
    export AWS_PROFILE=default
    ```
 
-4. **Grant Accessibility Permissions:**
+3. Grant Accessibility Permissions (MacOS):
+   - The script uses `pyautogui` to control mouse and keyboard events
+   - Go to **System Preferences** > **Security & Privacy** > **Privacy** tab
+   - Select **Accessibility** from the list on the left
+   - Add your terminal application or Python interpreter to the list of allowed apps
+   - Note: Permission popups should appear automatically on first run
 
-   The script uses `pyautogui` to control mouse and keyboard events. On MacOS, you need to grant accessibility permissions. These popups should show automatically the first time you run the script so you can skip this step. But to manually provide permissions:
+## Running the Application
 
-   - Go to **System Preferences** > **Security & Privacy** > **Privacy** tab.
-   - Select **Accessibility** from the list on the left.
-   - Add your terminal application or Python interpreter to the list of allowed apps.
+1. Start the Streamlit application:
+   ```bash
+   streamlit run run_with_streamlit.py
+   ```
 
-## Usage
+2. The application will open in your default web browser, showing the following interface:
+   - Left panel: Main interaction area
+   - Right panel: Screenshot upload section
+   - Sidebar: Configuration options
 
-You can run the script by passing the instruction directly via the command line or by editing the `main.py` file.
+## Using the Application
 
-**Example using command line instruction:**
+### 1. Configuration (Sidebar)
+- Select the AI model (default: claude-3-sonnet)
+- Choose the provider (default: BEDROCK)
+- Customize the system prompt if needed
+- Edit instructions in the instructions editor
 
-```bash
-python3.12 run_in_terminal.py 'Open Safari and look up Anthropic'
+### 2. Adding Instructions
+- Instructions can be added in two ways:
+  1. Through the sidebar's instruction editor
+  2. By editing the `instructions.txt` file directly
+- Each instruction should be on a new line
+- Example instructions:
+  ```
+  Open Safari
+  Go to Google Spreadsheets
+  Create a new spreadsheet with two columns
+  ```
+  Click on the "Save Instructions" button to save changes
+
+### 3. Executing Instructions
+
+#### Automatic Execution
+1. Click "Execute All Steps" to run all instructions sequentially
+2. The agent will:
+   - Take screenshots to understand the current state
+   - Execute necessary actions (mouse movements, keyboard inputs)
+   - Provide feedback through the conversation history
+
+#### Manual Control
+- Use "Next Step" to move to the next instruction
+- Use "Stop" to interrupt the execution
+- Use "Clear Conversation" to reset the chat history
+- Use "Reset All" to start over completely
+
+### 4. Screenshot Integration
+- The right panel allows you to upload screenshots
+- Click "📸 Click a screenshot to continue" to upload an image
+- The agent will analyze the screenshot and continue its tasks accordingly
+
+## Example Workflow
+
+Here's a sample workflow demonstrating the agent creating a Google Spreadsheet:
+
+1. Initial Setup
+   ![Initial Screen](screenshots/Screenshot%20Tool%20BDRK.png)
+   - Agent opens Safari
+
+2. Navigation
+   ![Google Sheets Navigation](screenshots/Screenshot%20Tool%20BDRK%20(1).png)
+   - Agent navigates to Google Sheets
+
+3. Creating Spreadsheet
+   ![Spreadsheet Creation](screenshots/Screenshot%20Tool%20BDRK%20(2).png)
+   - Agent creates a new spreadsheet
+
+4. Adding Content
+   ![Adding Columns](screenshots/Screenshot%20Tool%20BDRK%20(3).png)
+   - Agent adds column headers
+
+5. Final Result
+   ![Final Spreadsheet](screenshots/Screenshot%20Tool%20BDRK%20(4).png)
+   - Completed spreadsheet with columns
+
+## Understanding the Output
+
+The conversation history shows different types of messages:
+- 🤖 Assistant: AI's planned actions
+- 💻 System: System-level operations
+- 🔧 Tool Output: Specific actions performed
+
+Example output sequence:
+```
+💻 System: I'll help you take a screenshot and then open Safari...
+💻 System: Now, let's open Safari using the bash command:
+🔧 Tool Output: Mouse moved successfully to X=623, Y=55
+🔧 Tool Output: Left click performed.
 ```
 
-Replace `'Open Safari and look up Anthropic'` with your desired instruction.
+## Troubleshooting
 
-**Note:** If you do not provide an instruction via the command line, the script will use the default instruction specified in `main.py`. You can edit `main.py` to change this default instruction.
+1. If the agent seems stuck:
+   - Use the "Stop" button to interrupt the current execution
+   - Clear the conversation and try again with more specific instructions
+   - Ensure the instructions are clear and actionable
 
-**How to run the frontend?**
+2. Common considerations:
+   - Mouse coordination: The agent will adjust based on screen feedback
+   - Browser navigation: The agent uses visual cues to navigate
+   - Screen resolution: The agent adapts to your screen layout
 
-```bash
-streamlit run run_with_streamlit.py
-```
+## Tips for Best Results
 
-## Exiting the Script
-
-You can quit the script at any time by pressing `Ctrl+C` in the terminal.
-
-## ⚠ Disclaimer
-
-> [!CAUTION]
-> - **Security Risks:** This script allows claude to control your computer's mouse and keyboard and run bash commands. Use it at your own risk.
-> - **Responsibility:** By running this script, you assume all responsibility and liability for any results.
+1. Write clear, specific instructions
+2. Allow the agent to complete its current task before interrupting
+3. Use the screenshot feature when the agent needs visual context
+4. Monitor the conversation history for detailed feedback
+5. Use "Stop" if you need to interrupt a sequence of actions

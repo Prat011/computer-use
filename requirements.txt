@@ -3,3 +3,4 @@ pillow
 PyAutoGUI
 streamlit
 nest_asyncio
+composio-claude

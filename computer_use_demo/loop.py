@@ -109,6 +109,8 @@ async def sampling_loop(
         BashTool(),
         EditTool(),
     )
+
+    tools_params = tool_collection.to_params()
     system = (
         f"{SYSTEM_PROMPT}{' ' + system_prompt_suffix if system_prompt_suffix else ''}"
     )
