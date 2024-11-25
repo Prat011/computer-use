@@ -38,11 +38,17 @@ def save_instructions(instructions):
             file.write(f"- {instruction}\n")
         
 # Initialize Streamlit state for task tracking
-if 'messages' not in st.session_state or 'initialized' not in st.session_state:
+if 'initialized' not in st.session_state:
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    
     st.session_state.initialized = True
     st.session_state.messages = []
     st.session_state.screenshots = []
-    st.session_state.loop = None
+    st.session_state.loop = loop
     st.session_state.instructions = load_instructions()
     st.session_state.current_task = None
     st.session_state.is_running = False
@@ -50,17 +56,10 @@ if 'messages' not in st.session_state or 'initialized' not in st.session_state:
     st.session_state.step_completed = False
 
 def init_asyncio_loop():
-    if not st.session_state.loop:
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-        st.session_state.loop = loop
     return st.session_state.loop
 
 # Initialize the asyncio loop
-init_asyncio_loop()
+loop = init_asyncio_loop()
 
 st.set_page_config(page_title="Claude Computer Use Demo", layout="wide")
 
@@ -112,6 +111,9 @@ with st.sidebar:
 # Main content area
 st.subheader("Current Instruction")
 if st.session_state.instructions:
+    # Add bounds checking
+    if st.session_state.current_step >= len(st.session_state.instructions):
+        st.session_state.current_step = len(st.session_state.instructions) - 1
     current_instruction = st.session_state.instructions[st.session_state.current_step]
     st.info(f"Step {st.session_state.current_step + 1} of {len(st.session_state.instructions)}: {current_instruction}")
 else:

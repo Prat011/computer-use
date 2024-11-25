@@ -77,7 +77,6 @@ This guide walks you through the process of using the Computer Use Demo, which d
    - Provide feedback through the conversation history
 
 #### Manual Control
-- Use "Next Step" to move to the next instruction
 - Use "Stop" to interrupt the execution
 - Use "Clear Conversation" to reset the chat history
 - Use "Reset All" to start over completely
@@ -145,3 +144,42 @@ Example output sequence:
 3. Use the screenshot feature when the agent needs visual context
 4. Monitor the conversation history for detailed feedback
 5. Use "Stop" if you need to interrupt a sequence of actions
+
+## Windows Example Workflow
+
+Here's a sample workflow demonstrating the agent performing tasks on Windows:
+
+1. Initial Desktop
+   ![Screenshot 1](screenshots/windows_sheet_1.png)
+
+2. Opening Applications
+   ![Screenshot 2](screenshots/windows_sheet_2.png)
+
+3. Performing Operations
+   ![Screenshot 3](screenshots/windows_sheet_3.png)
+
+4. Browser Interaction
+   ![Screenshot 4](screenshots/windows_sheet_4.png)
+
+5. Spreadsheet Tasks
+   ![Screenshot 5](screenshots/windows_sheet_5.png)
+
+Note: The actual appearance may vary depending on your Windows version and theme settings.
+
+### Windows-Specific Tips
+
+1. Screen Resolution:
+   - The agent adapts to your Windows display settings
+   - Works with both single and multi-monitor setups
+
+2. Application Access:
+   - Ensure applications are accessible via Start menu or desktop
+   - Keep frequently used applications pinned to taskbar for easier access
+
+3. Browser Compatibility:
+   - Works with Chrome, Edge, and other browsers
+   - Browser should be updated to latest version for best results
+
+4. Windows Permissions:
+   - Allow Python/Terminal through Windows Defender if prompted
+   - Grant necessary permissions for screen capture and input control
