@@ -4,7 +4,7 @@ This guide walks you through the process of using the Computer Use Demo, which d
 
 ## Setup and Installation
 
-1. Make sure you have Python installed on your system
+1. Make sure you have Python3.11 installed on your system
 2. Install the required dependencies:
    ```bash
    pip install -r requirements.txt

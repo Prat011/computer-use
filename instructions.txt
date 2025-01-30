@@ -1,2 +1,3 @@
-- Open Safari
-- Search and open Google.com interface
+- Open chrome
+- Click on the profile with a black screenshot
+- Search and open Gmail.com

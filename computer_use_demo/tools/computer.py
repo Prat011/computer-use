@@ -1,7 +1,7 @@
 import asyncio
 import base64
 import io
-from enum import StrEnum
+from enum import Enum
 from typing import Literal, TypedDict
 import pyautogui
 from anthropic.types.beta import BetaToolComputerUse20241022Param
@@ -27,9 +27,12 @@ Action = Literal[
 ]
 
 
-class ScalingSource(StrEnum):
+class ScalingSource(str, Enum):
     COMPUTER = "computer"
     API = "api"
+
+    def __str__(self):
+        return self.value
 
 
 class ComputerToolOptions(TypedDict):
@@ -95,7 +98,7 @@ class ComputerTool(BaseAnthropicTool):
         **kwargs,
     ):
         print(
-            f"### Performing action: {action}{f", text: {text}" if text else ''}{f", coordinate: {coordinate}" if coordinate else ''}"
+            f"### Performing action: {action}{f', text: {text}' if text else ''}{f', coordinate: {coordinate}' if coordinate else ''}"
         )
         if action in ("mouse_move", "left_click_drag"):
             if coordinate is None:

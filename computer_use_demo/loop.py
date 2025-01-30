@@ -5,7 +5,7 @@ Agentic sampling loop that calls the Anthropic API and local implenmentation of 
 import platform
 from collections.abc import Callable
 from datetime import datetime
-from enum import StrEnum
+from enum import Enum
 from typing import Any, cast
 
 from anthropic import Anthropic, AnthropicBedrock, AnthropicVertex, APIResponse
@@ -27,10 +27,14 @@ from .tools import BashTool, ComputerTool, EditTool, ToolCollection, ToolResult
 BETA_FLAG = "computer-use-2024-10-22"
 
 
-class APIProvider(StrEnum):
+# Replace StrEnum with custom implementation for Python < 3.11
+class APIProvider(str, Enum):
     ANTHROPIC = "anthropic"
     BEDROCK = "bedrock"
     VERTEX = "vertex"
+
+    def __str__(self):
+        return self.value
 
 
 PROVIDER_TO_DEFAULT_MODEL_NAME: dict[APIProvider, str] = {
